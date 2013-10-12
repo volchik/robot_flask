@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block content %}
+    <form action="/" id="myform">
+        <p align="right"><input type="button" method="POST" value="Выход" onclick="logout()"></p>
+        <table border="0" align="right" cellspacing="0" cellpadding="0" color="black">
+        <tr>
+            <td align="center">
+                <img border="0" height="50" width="50" id="imgLight" 
+                    src="{{ url_for('static', filename='img/light-off.png') }}" onclick="LightOn()"/>
+            </td>
+            <td align="center">
+                <img border="0" height="50" width="50" 
+                    src="{{ url_for('static', filename='img/cam-up.png') }}" onclick="send('cam_up');"/>
+            </td> 
+            <td align="left" valign="center" colspan="3">
+                <div id="temperature"></div>
+                <div id="pressure"></div>
+            </td>
+ 	</tr>
+	<tr>
+            <td halign="center">
+                <img border="0" height="50" width="50" 
+                    src="{{ url_for('static', filename='img/cam-left.png') }}" onclick="send('cam_left');"/>
+            </td>
+            <td>
+                <!-- <img width="600" height="400" id="imgDisplay" src="/jpeg" NOSAVE onLoad="OnImgLoad()" /> -->
+                <img width="600" height="400" src="/mjpeg"/> 
+            </td>
+            <td valign="center">
+                <img border="0" height="50" width="50" 
+                    src="{{ url_for('static', filename='img/cam-right.png') }}" onclick="send('cam_right');"/>
+            </td>
+            <td width="50"></td>
+            <td align="center" valign="center">
+                <table border="0" cellspacing="0" cellpadding="0" color="black">
+                    <tr>
+                        <td></td>
+                        <td>
+                            <img border="0" height="50" width="50" 
+                                src="{{ url_for('static', filename='img/mot-fwd.png') }}" onclick="send('move_forward');"/>
+                        </td>
+			<td></td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <img border="0" height="50" width="50" 
+                                src="{{ url_for('static', filename='img/mot-left.png') }}" onclick="send('move_left');"/>
+                        </td>
+                        <td></td>
+                        <td>
+                            <img border="0" height="50" width="50" 
+                                src="{{ url_for('static', filename='img/mot-right.png') }}" onclick="send('move_right');"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td>
+                            <img border="0" height="50" width="50" 
+                                src="{{ url_for('static', filename='img/mot-rev.png') }}" onclick="send('move_backward');"/>
+                        </td>
+                        <td></td>
+                    </tr>
+                </table>
+            </td>
+ 	</tr>
+        <tr>
+            <td></td>
+            <td align="center">
+                <img border="0" height="50" width="50" 
+                    src="{{ url_for('static', filename='img/cam-down.png') }}" onclick="send('cam_down');"/>
+            </td>
+            <td></td>
+        </tr>
+        <tr>
+            <td align="center" colspan="3">
+                <input type="button" value="480x360" onclick="SetResolution(0)">
+                <input type="button" value="640x480" onclick="SetResolution(1)">
+                <input type="button" value="1280x1024" onclick="SetResolution(2)">
+            </td>
+        </tr>
+        <tr height="20">
+            <td align="center" valign="center" colspan="3">
+                <div id="result"></div>
+            </td>
+        </tr>
+	<tr height="20">
+            <td align="center" valign="center" colspan="3">
+                <div id="key"></div>
+            </td>
+        </tr>
+    </table>
+    </form>
+{% endblock %}
+

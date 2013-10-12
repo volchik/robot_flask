@@ -1,0 +1,28 @@
+<html>
+  <head>
+    {% if title %}
+    <title>{{title}}</title>
+    {% else %}
+    <title>Управление роботом</title>
+    {% endif %}
+    <script src="{{ url_for('static', filename='js/jquery.js') }}"  type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/command.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='js/camera.js') }}"  type="text/javascript"></script>
+    <script language="Javascript">
+        var isLightOn = 0;
+        function LightOn() {
+            if (isLightOn) {
+                document.getElementById("imgLight").src = "{{ url_for('static', filename='img/light-off.png') }}";
+                send("light_off");
+            } else {
+                document.getElementById("imgLight").src = "{{ url_for('static', filename='img/light-on.png') }}";
+                send("light_on");
+            }
+            isLightOn = 1-isLightOn;
+        }
+    </script>
+  </head>
+  <body bgcolor="C0C0C0" onKeyDown="keyEvent()">
+    {% block content %}{% endblock %}
+  </body>
+</html>
