@@ -2,14 +2,13 @@
 # coding: utf-8
 import os
 import time
-#import glob
-#import itertools
 from cv2 import cv
 
 
 class Camera(object):
     def __init__(self, cam_num, cam_mode=1, cam_fps=-1, cam_quality=70, cam_put_date=False):
         self.capture = cv.CaptureFromCAM(cam_num)
+        self.num     = cam_num
         self.mode    = cam_mode
         self.fps     = cam_fps
         self.quality = cam_quality
@@ -73,18 +72,22 @@ class Camera(object):
         red, green, blue = self.textColor
         textColor = cv.RGB(red, green, blue)
         img = cv.QueryFrame(self.capture)
+
+        #Задержка для нормализации периодического процесса захвата (см. документацию)
+        cv.WaitKey(10)
+
         if put_date:
-            text = time.strftime("%d/%m/%Y %H:%M:%S",time.localtime())
+            text = time.strftime('%d/%m/%Y %H:%M:%S',time.localtime())
             textSize, baseline = cv.GetTextSize(text,self.font)
             cv.PutText(img, text, (textSize[1],2*textSize[1]),self.font, textColor)
 
-        if frameSpeed != 0:
-            text = str(frameSpeed) + "kb/s  " + str(frameFps) + "fps"
+        if frameSpeed:
+            text = str(frameSpeed) + 'kb/s  ' + str(frameFps) + 'fps'
             textSize, baseline = cv.GetTextSize(text,self.font)
             cv.PutText(img, text, (self.width - textSize[0] - textSize[1], self.height - textSize[1]), 
                        self.font, textColor)
 
-        cv2mat = cv.EncodeImage(".jpeg", img, (cv.CV_IMWRITE_JPEG_QUALITY, self.quality))
+        cv2mat = cv.EncodeImage('.jpeg', img, (cv.CV_IMWRITE_JPEG_QUALITY, self.quality))
         return cv2mat.tostring()
 
  

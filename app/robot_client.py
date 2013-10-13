@@ -1,63 +1,77 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+import logging
 import serial
 from serial import SerialException
 import time
 import sys
 
-#======================================
-# Robot class 
-#======================================
+logger = logging.getLogger(__name__)
+
+############################################
+#  Класс связи с аппаратной частью робота  #
+############################################
 
 class Robot:
     def __init__(self, port, baudrate, timeout =0.1):
         self.port     = port
         self.baudrate = baudrate
         self.timeout  = timeout
-        self.connected= False
-        self.last_error = ''
-        self.busy = False
         self.connect()
 
     def connect(self):
         try:
-            self.port = serial.Serial(self.port, self.baudrate, timeout = self.timeout)
+            self.busy = False
+            self.last_error = ''
+            #Открытие порта
+            self.serial = serial.Serial(self.port, self.baudrate, timeout = self.timeout)
             #Ожидание инициализации...
             time.sleep(2) 
-            self.busy = False
-            self.connected = True
+            logger.info('Подключен к устройству: %s' % self.port)
         except SerialException:
-            self.last_error = 'Ошибка подключения к %s(%s)' % (self.port, self.baudrate)
-            self.connected  = False
+            self.serial     = None
+            self.last_error = 'Ошибка подключения к %s' % self.port
+            logger.error(self.last_error)
         except:
-            self.last_error = sys.exc_info()[1]
-            self.connected  = False
+            self.serial     = None
+            self.last_error = 'Ошибка подключения: "%s"' % sys.exc_info()[1]
+            logger.error(self.last_error)
 
     def close(self):
-        self.port.close()
-        self.connected = False
+        self.last_error = ''
+        self.serial.close()
+        logger.info('Подключение к %s закрыто' % self.port)
 
     def reconnect(self):
         self.close()
         self.connect()
 
     def invoke(self, command, check=True):
-        if not self.connected:
+        #Неопределен serial, вероятно была ошибка
+        if not self.serial:
             return self.last_error
 
-        #ждем пока busy
-        while (self.busy):
-            None
+        #Выход если порт не открыт
+        if not self.serial.isOpen():
+            return self.last_error
 
-        #установим busy
+        #Ждем пока не освободится
+        while (self.busy):
+            pass
+
+        #Установим флаг занятости
         self.busy = True
         try:
-            self.port.write(command+'\r')
-            result = self.port.readline().replace('\n', '').replace('\r', '')
+            logger.debug('Отправка комманды: %s' % command)
+            self.serial.write(command+'\r')
+            logger.debug('Отправлена комманда: %s' % command)
+            result = self.serial.readline().replace('\n', '').replace('\r', '')
+            logger.debug('Получено: %s' % result)
         except:
+            logger.error('Ошибка отправки/получения: "%s"' % sys.exc_info()[1])
             return sys.exc_info()[1]
-        #снимем busy
+        #Снимем флаг зянятости
         self.busy = False
         if check and result[0:len(command)] != command:
             return u'Error: Отправлено: "%s" Получено: "%s"' % (command, result)
@@ -98,15 +112,15 @@ class Robot:
         result = self.invoke('TG', False)
         if result[:2] == 'TG':
             return result[2:]
-        else:  #вернуть ошибку
-            return result
+        #Вернем ошибку
+        return result
 
     def get_pressure(self):
         result = self.invoke('PG', False)
         if result[:2] == 'PG':
             return result[2:]
-        else:  #вернуть ошибку
-            return result
+        #Вернем ошибку
+        return result
 
 
 if __name__ == '__main__':

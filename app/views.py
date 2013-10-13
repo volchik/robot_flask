@@ -20,11 +20,11 @@ def check_auth(username, password):
     return username == 'admin' and password == 'qwerty'
 
 def authenticate():
-    # Посслать ответ 401 для вызова Basic Auth
+    # Послать ответ 401 для вызова Basic Auth
     return Response(
     'Could not verify your access level for that URL.\n'
     'You have to login with proper credentials', 401,
-    {'WWW-Authenticate': 'Basic realm="Robot Page"'})
+    {'WWW-Authenticate': 'Basic realm="' + str(request.path) + '"'})
 
 def logged():
     auth = request.authorization
@@ -44,20 +44,21 @@ def requires_auth(f):
 @app.route('/')
 @requires_auth
 def index():
-    logger.info(request.path)
-    return render_template("index.html", title = None)
+    logger.debug(request.path)
+    logger.debug(request.authorization)
+    return render_template("index.html", title=None, mjpeg=True)
 
 @app.route('/logout', methods=['POST', 'GET'])
 @requires_auth
 def logout():
-    logger.info(request.path)
-    logger.info(request.authorization)
+    logger.debug(request.path)
+    logger.debug(request.authorization)
     return redirect(url_for('index'))
 
 @app.route('/mjpeg')
 def mjpeg():
     if not logged():
-        abort(404)
+        abort(401)
 
     put_date = current_app.camera.put_date
     if request.args.get('nodate',None) == '1':
@@ -65,13 +66,16 @@ def mjpeg():
    
     def jpeg_generator(camera):
         fps   = camera.fps
-        delay = 1 / fps
+        if fps > 0:
+            delay = 1 / fps
+        else:
+            delay = 0.05
         frameTime = time.time()
         frameCount = 0
         frameFps = 0
         frameSize = 0
         frameSpeed = 0
-        frameRefreshTime = 5 #Считать скорост каждые ХХХ секунд
+        frameRefreshTime = 5 #Считать скорость захвата каждые ХХХ секунд
         logger.info('Начало MJPEG потока, задержка: %.2f' % delay)
         last_time = time.time()
         while True:
@@ -86,7 +90,7 @@ def mjpeg():
             if wait > 0:
                 time.sleep(wait)
             last_time = time.time()
-            # считаем скорость захвата
+            #Считаем скорость захвата
             frameCount += 1
             if time.time() - frameTime > frameRefreshTime: 
                 frameFps = round(frameCount/(time.time() - frameTime),1)
@@ -104,14 +108,12 @@ def mjpeg():
 @app.route('/jpeg')
 def jpeg():
     if not logged():
-        abort(404)
+        abort(401)
 
     put_date = current_app.camera.put_date
     if request.args.get('nodate',None) == '1':
         put_date = False
     image = current_app.camera.get_image(put_date)
-    if logger.levelname.upper() != 'DEBUG':
-       logger.info('Отправка кадра %s байт' % len(image))
     logger.debug('Отправка кадра %s байт' % len(image))
     return Response(image, 200, content_type='image/jpeg')
 
@@ -119,7 +121,7 @@ def jpeg():
 @app.route('/get_temperature')
 def get_temperature():
     if not logged():
-        return "Нет доступа"
+        return 'Нет доступа'
 
     logger.debug('Запрос температуры')
     result = str(current_app.robot.get_temperature())
@@ -129,11 +131,11 @@ def get_temperature():
 @app.route('/get_pressure')
 def get_pressure():
     if not logged():
-        return "Нет доступа"
+        return 'Нет доступа'
 
     logger.debug('Запрос давления')
     result = current_app.robot.get_pressure()
-    #результат в паскалях, преобразуем в мм.рт.ст.
+    #Результат в паскалях, преобразуем в мм.рт.ст.
     try:
         pressure = str(int(float(result)/133.33))
     except:
@@ -144,7 +146,7 @@ def get_pressure():
 @app.route('/invoke/<command>', methods=['POST', 'GET'])
 def invoke(command):
     if not logged():
-        return "Нет доступа"
+        return 'Нет доступа'
 
     method = getattr(current_app.robot, command, None)
     if callable(method):
@@ -162,9 +164,23 @@ def invoke(command):
 @app.route('/set_resolution/<int:mode>', methods=['POST', 'GET'])
 def set_resolution(mode):
     if not logged():
-        return "Нет доступа"
+        return 'Нет доступа'
 
     current_app.camera.mode = mode
     logger.info('Смена режима работы камеры: %sx%s' % (current_app.camera.width, current_app.camera.height))
     return '%sx%s' % (current_app.camera.width, current_app.camera.height)
 
+
+@app.errorhandler(401)
+def page_access_denied(error):
+    return render_template('error_401.html', title='Доступ запрещен'), 401
+
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('error_404.html', title='Страница не найдена'), 200
+
+
+@app.errorhandler(500)
+def page_not_found(error):
+    return render_template('error_404.html', title='Страница не найдена'), 500

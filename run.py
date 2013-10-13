@@ -22,7 +22,7 @@ logger = logging.getLogger('main')
 def configure_logging(config):
     root_logger = logging.getLogger()
     root_logger.setLevel(config.log_level)
-    formatter = logging.Formatter('%(asctime)-15s %(levelname)-7s %(name)-15s %(message)s')
+    formatter = logging.Formatter('%(asctime)-15s %(levelname)-7s %(name)-20s %(message)s')
     if config.log_to_stdout:
         stdout_handler = logging.StreamHandler(sys.stdout)
         stdout_handler.setFormatter(formatter)
@@ -43,8 +43,8 @@ def start_server(config):
     endpoint = TCP4ServerEndpoint(reactor, config.server_port)
     d = endpoint.listen(factory)
     logger.info('Старт сервера...')
-    d.addCallback(lambda _: logger.info(u'Порт открыт...'))
-    d.addErrback(lambda failure: (logger.error(u'Ошибка открытия порта: %s' % failure.getErrorMessage()) or
+    d.addCallback(lambda _: logger.info(u'Сервер стартовал...'))
+    d.addErrback(lambda failure: (logger.error(u'Ошибка старта: %s' % failure.getErrorMessage()) or
                                   logger.error(u'Stopping reactor...') or
                                   reactor.callLater(0, reactor.stop)))
 
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     basedir  = os.path.abspath(os.path.dirname(__file__))
-    config_filename = "server.conf"
+    config_filename = 'server.conf'
     config_filename = os.path.join(basedir, config_filename)
 
     config = Config(config_filename)

@@ -42,8 +42,11 @@
                     src="{{ url_for('static', filename='img/cam-left.png') }}" onclick="send('cam_left');"/>
             </td>
             <td>
-                <!-- <img width="600" height="400" id="imgDisplay" src="/jpeg" NOSAVE onLoad="OnImgLoad()" /> -->
-                <img width="600" height="400" src="/mjpeg"/> 
+              {% if mjpeg %}
+                <img width="600" height="400" src="/mjpeg"/>
+              {% else %}
+                <img width="600" height="400" id="imgDisplay" src="/jpeg" NOSAVE onLoad="OnImgLoad()" /> 
+              {% endif %}
             </td>
             <td valign="center">
                 <img border="0" height="50" width="50" 
