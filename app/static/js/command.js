@@ -51,7 +51,7 @@ function keyEvent() {
                       case 'Z': {send("cam_down"); break} //Камера вниз
                       case 'A': {send("cam_left"); break} //Камера влево
                       case 'S': {send("cam_right"); break} //Камера вправо
-                      default: {send(String.fromCharCode(event.keyCode)); break}
+                      default: <!-- {send(String.fromCharCode(event.keyCode)); -->  break}
                  }
   }
   $("#key").empty();

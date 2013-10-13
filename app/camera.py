@@ -14,8 +14,7 @@ class Camera(object):
         self.fps     = cam_fps
         self.quality = cam_quality
         self.put_date= cam_put_date
-        self.textColor = cv.RGB(255,255,255)
-        self.font = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 0.5*(self.mode+1), 0.5*(self.mode+1), 0, self.mode+1, 8)
+        self.textColor = (255,255,255)
 
     @property
     def width(self):
@@ -62,22 +61,28 @@ class Camera(object):
             self.width  = 1280
             self.height = 1024
 
-    def set_textColor(self, Color):
-        red, green, blue = Color
-        self.textColor = cv.RGB(red,green,blue)
+    @property
+    def textColor(self):
+        return self._textColor
+
+    @textColor.setter
+    def textColor(self, value):
+        self._textColor = value
 
     def get_image(self, put_date=False, frameSpeed=0, frameFps=0):
+        red, green, blue = self.textColor
+        textColor = cv.RGB(red, green, blue)
         img = cv.QueryFrame(self.capture)
         if put_date:
             text = time.strftime("%d/%m/%Y %H:%M:%S",time.localtime())
             textSize, baseline = cv.GetTextSize(text,self.font)
-            cv.PutText(img, text, (textSize[1],2*textSize[1]),self.font, self.textColor)
+            cv.PutText(img, text, (textSize[1],2*textSize[1]),self.font, textColor)
 
         if frameSpeed != 0:
             text = str(frameSpeed) + "kb/s  " + str(frameFps) + "fps"
             textSize, baseline = cv.GetTextSize(text,self.font)
             cv.PutText(img, text, (self.width - textSize[0] - textSize[1], self.height - textSize[1]), 
-                       self.font, self.textColor)
+                       self.font, textColor)
 
         cv2mat = cv.EncodeImage(".jpeg", img, (cv.CV_IMWRITE_JPEG_QUALITY, self.quality))
         return cv2mat.tostring()
