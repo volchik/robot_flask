@@ -7,7 +7,6 @@ sys.setdefaultencoding('utf-8')
 import logging
 import sys
 import os
-import argparse
 import functools
 from twisted.internet.endpoints import TCP4ServerEndpoint
 from twisted.web.server import Site
@@ -65,15 +64,23 @@ class Server(Daemon):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('action', nargs='?', choices=['start', 'stop', 'restart'])
-    args = parser.parse_args()
+
+    action = None
+    if len(sys.argv) > 1:
+        action = sys.argv[1]
+    
+    if not action in ('start', 'stop', 'restart', 'run'):
+        print 'Запуск: %s start|stop|restart|run' % sys.argv[0]
+        exit(1)
 
     basedir  = os.path.abspath(os.path.dirname(__file__))
     config_filename = 'server.conf'
     config_filename = os.path.join(basedir, config_filename)
 
     config = Config(config_filename)
+    #Если запускаем как демона, то выключаем вывод в stdout
+    if not action == 'run':
+        config.log_to_stdout = False
     config.create_dirs()
     pid = config.pid_filename
     stdout = os.path.join(config.log_dir, 'stdout.log')
@@ -82,12 +89,14 @@ if __name__ == '__main__':
     target = functools.partial(start_server, config)
     server = Server(target, pid, stdout, stderr)
 
-    if args.action == 'start':
+    if action == 'start':
         server.start()
-    elif args.action == 'stop':
+    elif action == 'stop':
         server.stop()
-    elif args.action == 'restart':
+    elif action == 'restart':
         server.restart()
-    else:
+    elif action == 'run':
         target()
+    else:
+        pass
 

@@ -10,6 +10,7 @@ from app import robot_client
 
 def prepare_app(config):
     global app
+    app.debug = config.server_debug
     assert not hasattr(app, 'camera')
     assert not hasattr(app, 'robot')
     app.camera = camera.Camera(config.cam_num, config.cam_mode, 

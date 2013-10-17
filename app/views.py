@@ -24,7 +24,7 @@ def authenticate():
     return Response(
     'Could not verify your access level for that URL.\n'
     'You have to login with proper credentials', 401,
-    {'WWW-Authenticate': 'Basic realm="' + str(request.path) + '"'})
+    {'WWW-Authenticate': 'Basic realm="Robot control"'})
 
 def logged():
     auth = request.authorization
@@ -69,7 +69,7 @@ def mjpeg():
         if fps > 0:
             delay = 1 / fps
         else:
-            delay = 0.05
+            delay = 0.03
         frameTime = time.time()
         frameCount = 0
         frameFps = 0
@@ -125,6 +125,7 @@ def get_temperature():
 
     logger.debug('Запрос температуры')
     result = str(current_app.robot.get_temperature())
+    logger.debug('Ответ на запрос температуры: %s' % result)
     return result
 
 
@@ -139,7 +140,9 @@ def get_pressure():
     try:
         pressure = str(int(float(result)/133.33))
     except:
+        logger.debug('Ответ на запрос давления: %s' % result)
         return result
+    logger.debug('Ответ на запрос давления: %s' % pressure)
     return pressure
 
 
@@ -153,11 +156,12 @@ def invoke(command):
         logger.info('Получена комманда: %s(%s)' % (command, ', '.join(['='.join(i) for i in request.args.items()])))
         result = method(**request.args)
         if result:
+            logger.info('Ответ на комманду "%s": %s' % (command, result))
             return result
         else:
-            return '%s - OK!' % command
+            return '%s - OK???' % command
     else:
-        logger.error('Неправильная комманда: %s' % command)
+        logger.error('Комманда "%s" не найдена' % command)
         abort(404)
 
 
@@ -178,7 +182,7 @@ def page_access_denied(error):
 
 @app.errorhandler(404)
 def page_not_found(error):
-    return render_template('error_404.html', title='Страница не найдена'), 200
+    return render_template('error_404.html', title='Страница не найдена'), 404
 
 
 @app.errorhandler(500)

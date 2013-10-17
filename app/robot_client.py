@@ -28,19 +28,24 @@ class Robot:
             self.serial = serial.Serial(self.port, self.baudrate, timeout = self.timeout)
             #Ожидание инициализации...
             time.sleep(2) 
-            logger.info('Подключен к устройству: %s' % self.port)
+            if self.serial.isOpen():
+                logger.info('Подключен к устройству: %s' % self.port)
+            else:
+                self.last_error = 'Подключение к устройству %s не установлено' %  self.port
+                logger.error(self.last_error)
         except SerialException:
             self.serial     = None
             self.last_error = 'Ошибка подключения к %s' % self.port
             logger.error(self.last_error)
         except:
             self.serial     = None
-            self.last_error = 'Ошибка подключения: "%s"' % sys.exc_info()[1]
+            self.last_error = 'Ошибка подключения: %s' % sys.exc_info()[1]
             logger.error(self.last_error)
 
     def close(self):
         self.last_error = ''
-        self.serial.close()
+        if self.serial and self.serial.isOpen():
+            self.serial.close()
         logger.info('Подключение к %s закрыто' % self.port)
 
     def reconnect(self):
@@ -109,14 +114,14 @@ class Robot:
         return self.invoke('LF')
 
     def get_temperature(self):
-        result = self.invoke('TG', False)
+        result = self.invoke('TG')
         if result[:2] == 'TG':
             return result[2:]
         #Вернем ошибку
         return result
 
     def get_pressure(self):
-        result = self.invoke('PG', False)
+        result = self.invoke('PG')
         if result[:2] == 'PG':
             return result[2:]
         #Вернем ошибку

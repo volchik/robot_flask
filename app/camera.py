@@ -74,7 +74,9 @@ class Camera(object):
         img = cv.QueryFrame(self.capture)
 
         #Задержка для нормализации периодического процесса захвата (см. документацию)
-        cv.WaitKey(10)
+        #По непонятной причине из-за cv.WaitKey вылетает сервер 
+        #с ошибкой "Ошибка сегментирования (сделан дамп памяти)" после смены размера картинки
+        #cv.WaitKey(10)
 
         if put_date:
             text = time.strftime('%d/%m/%Y %H:%M:%S',time.localtime())
