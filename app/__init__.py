@@ -8,15 +8,16 @@ import views
 from app import camera
 from app import robot_client
 
-def prepare_app(config):
+def prepare_app(config, command):
     global app
     app.debug = config.server_debug
     assert not hasattr(app, 'camera')
     assert not hasattr(app, 'robot')
+    assert not hasattr(app, 'cmd_dict')
     app.camera = camera.Camera(config.cam_num, config.cam_mode, 
                                config.cam_fps, config.cam_quality, 
                                config.cam_put_date)
     app.robot = robot_client.Robot(config.robot_port, config.robot_baudrate)
+    app.cmd_dict = command
     return app
 
- 

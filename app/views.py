@@ -69,7 +69,7 @@ def mjpeg():
         if fps > 0:
             delay = 1 / fps
         else:
-            delay = 0.03
+            delay = 0.02
         frameTime = time.time()
         frameCount = 0
         frameFps = 0
@@ -157,7 +157,7 @@ def invoke(command):
         result = method(**request.args)
         if result:
             logger.info('Ответ на комманду "%s": %s' % (command, result))
-            return result
+            return app.cmd_dict.getCommandText(result)
         else:
             return '%s - OK???' % command
     else:

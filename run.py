@@ -15,6 +15,7 @@ from twisted.internet import reactor
 from daemon import Daemon
 import app
 from config import Config
+from command import Command
 
 logger = logging.getLogger('main')
 
@@ -31,9 +32,9 @@ def configure_logging(config):
     root_logger.addHandler(file_handler)
 
 
-def start_server(config):
+def start_server(config, command):
     configure_logging(config)
-    local_app = app.prepare_app(config)
+    local_app = app.prepare_app(config, command)
 
     resource = WSGIResource(reactor,
                             reactor.getThreadPool(),
@@ -55,12 +56,9 @@ class Server(Daemon):
         self.target = target
         super(Server, self).__init__(pidfile, '/dev/null', stdout, stderr)
 
-#    def set_config(self, config_filename):
-#        self.conf_filename = config_filename
 
     def run(self):
         self.target()
-
 
 
 if __name__ == '__main__':
@@ -74,9 +72,14 @@ if __name__ == '__main__':
         exit(1)
 
     basedir  = os.path.abspath(os.path.dirname(__file__))
+
+    command_filename= 'command.dict'
+    command_filename = os.path.join(basedir, command_filename)
+
     config_filename = 'server.conf'
     config_filename = os.path.join(basedir, config_filename)
 
+    command = Command(command_filename)
     config = Config(config_filename)
     #Если запускаем как демона, то выключаем вывод в stdout
     if not action == 'run':
@@ -86,7 +89,7 @@ if __name__ == '__main__':
     stdout = os.path.join(config.log_dir, 'stdout.log')
     stderr = os.path.join(config.log_dir, 'stderr.log')
 
-    target = functools.partial(start_server, config)
+    target = functools.partial(start_server, config, command)
     server = Server(target, pid, stdout, stderr)
 
     if action == 'start':
