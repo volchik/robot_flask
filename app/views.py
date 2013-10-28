@@ -5,55 +5,103 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 from app import app
+from db import db, User
 from functools import wraps
 import logging
-from flask import  Response, render_template, redirect, url_for, request, current_app, stream_with_context, abort
+from flask import Response, render_template, redirect, url_for
+from flask import request, current_app, stream_with_context, abort
+from flask import session
 import time
 import logging
 
 logger = logging.getLogger(__name__)
 
-
-################  Basic Auth  #########################
-def check_auth(username, password):
-    # Проверка логина и пароля
-    return username == 'admin' and password == 'qwerty'
-
-def authenticate():
-    # Послать ответ 401 для вызова Basic Auth
-    return Response(
-    'Could not verify your access level for that URL.\n'
-    'You have to login with proper credentials', 401,
-    {'WWW-Authenticate': 'Basic realm="Robot control"'})
-
+###############  Авторизация  #########################
 def logged():
-    auth = request.authorization
-    if not auth or not check_auth(auth.username, auth.password):
-        return False
-    return True
+    if session.get('logged'):
+        return True
+    return False
+
 
 def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if not logged():
-            return authenticate()
+            return redirect(url_for('login'))
+        #проверки пройдены
+        userexpire = session.get('expire')
+        username   = session.get('username','')
+
+        #превышено время действия авторизации
+        if userexpire < time.time():
+            return redirect(url_for('logout'))
+
         return f(*args, **kwargs)
     return decorated
 
 ###############  Обработка запросов  ##################
 @app.route('/')
 @requires_auth
-def index():
-    logger.debug(request.path)
-    logger.debug(request.authorization)
-    return render_template("index.html", title=None, mjpeg=True)
+def main():
+    return redirect(url_for('login'))
 
-@app.route('/logout', methods=['POST', 'GET'])
+
+@app.route('/index')
 @requires_auth
+def index():
+    lighton = current_app.robot.get_light()
+    logger.info('Запрос состояния освещения, получено %s' % lighton)
+    return render_template("index.html", title=None, mjpeg=True, lighton=lighton)
+
+
+@app.route('/mobile')
+@requires_auth
+def mobile():
+    lighton = current_app.robot.get_light()
+    logger.info('Запрос состояния освещения, получено %s' % lighton)
+    return render_template("index.html", title=None, mjpeg=False, lighton=lighton)
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username','')
+        password = request.form.get('password','')
+        remember = request.form.get('remember',False)
+        user = User.query.filter_by(username=username).first()
+        if user:
+            if user.check_password(password):
+                logger.info('Вход пользователя %s' % username)
+                session['username'] = username
+                session['logged']   = 1
+                session['expire']   = time.time()+60 #60 sec
+                session['remember'] = remember
+                return redirect(request.args.get("next") or url_for("index"))
+        return render_template('login.html', \
+                               title = 'Логин/пароль (регистрация)', \
+                               error = 'Неправильное имя пользователя или пароль', \
+                               username = username)
+
+    #запрос пароля
+    username = session.get('username','')
+    remember = session.get('remember',False)
+    return render_template('login.html', \
+                           title = 'Логин/пароль (регистрация)', \
+                           error = None, \
+                           username = username, \
+                           remember = remember)
+
+
+@app.route("/logout", methods=["GET", "POST"])
 def logout():
-    logger.debug(request.path)
-    logger.debug(request.authorization)
-    return redirect(url_for('index'))
+    logger.info('Выход пользователя %s' % session.get('username',''))
+    session.pop('logged', None)
+    session.pop('expire', None)
+    if not session.get('remember'):
+        session.pop('username', None)
+
+    return redirect(url_for('main'))
+
 
 @app.route('/mjpeg')
 def mjpeg():

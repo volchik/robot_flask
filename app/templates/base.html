@@ -6,6 +6,8 @@
     {% else %}
     <title>Управление роботом</title>
     {% endif %}
+    <link rel="stylesheet" media="all" type="text/css" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="SHORTCUT ICON" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
     {% block script %}{% endblock %}
   </head>
   <body {% block body %}{% endblock %} >

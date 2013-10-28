@@ -4,28 +4,44 @@
     <script src="{{ url_for('static', filename='js/command.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='js/camera.js') }}"  type="text/javascript"></script>
     <script language="Javascript">
+        {% if lighton %}
+        var isLightOn = 1;
+        {% else %}
         var isLightOn = 0;
+        {% endif %}
         function LightOn() {
+            isLightOn = 1-isLightOn;
             if (isLightOn) {
-                document.getElementById("imgLight").src = "{{ url_for('static', filename='img/light-off.png') }}";
-                send("light_off");
-            } else {
                 document.getElementById("imgLight").src = "{{ url_for('static', filename='img/light-on.png') }}";
                 send("light_on");
+            } else {
+                document.getElementById("imgLight").src = "{{ url_for('static', filename='img/light-off.png') }}";
+                send("light_off");
             }
-            isLightOn = 1-isLightOn;
         }
     </script>
 {% endblock %}
 {% block body %} bgcolor="C0C0C0" onKeyDown="keyEvent()" {% endblock%}
 {% block content %}
-    <form action="/" id="myform">
-        <p align="right"><input type="button" method="POST" value="Выход" onclick="logout()"></p>
+    <form action="/logout" id="myform">
+        <p align="right">
+            {% if mjpeg %}
+            <input class="button" type="submit" value="Мобильный вид" onClick='document.getElementById("myform").action="/mobile"'/>
+            {% else %}
+            <input class="button" type="submit" value="Стандартный вид" onClick='document.getElementById("myform").action="/index"'/>
+            {% endif %}
+            <input class="button" type="submit" value="Выход"/>
+        </p>
         <table border="0" align="right" cellspacing="0" cellpadding="0" color="black">
         <tr>
             <td align="center">
                 <img border="0" height="50" width="50" id="imgLight" 
-                    src="{{ url_for('static', filename='img/light-off.png') }}" onclick="LightOn()"/>
+                    {% if lighton %}
+                    src="{{ url_for('static', filename='img/light-on.png') }}" 
+                    {% else %}
+                    src="{{ url_for('static', filename='img/light-off.png') }}" 
+                    {% endif %}
+                    onclick="LightOn()"/>
             </td>
             <td align="center">
                 <img border="0" height="50" width="50" 
@@ -95,9 +111,9 @@
         </tr>
         <tr>
             <td align="center" colspan="3">
-                <input type="button" value="480x360" onclick="SetResolution(0)">
-                <input type="button" value="640x480" onclick="SetResolution(1)">
-                <input type="button" value="1280x1024" onclick="SetResolution(2)">
+                <input class="button" type="button" value="480x360" onclick="SetResolution(0)"/>
+                <input class="button" type="button" value="640x480" onclick="SetResolution(1)"/>
+                <input class="button" type="button" value="1280x1024" onclick="SetResolution(2)"/>
             </td>
         </tr>
         <tr height="20">

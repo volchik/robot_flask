@@ -113,19 +113,24 @@ class Robot:
     def light_off(self):
         return self.invoke('LF')
 
-    def get_temperature(self):
-        result = self.invoke('TG')
-        if result[:2] == 'TG':
-            return result[2:]
+    def get(self, command):
+        result = self.invoke(command)
+        if result[:len(command)] == command:
+            return result[len(command):]
         #Вернем ошибку
         return result
 
+    def get_temperature(self):
+        return self.get('TG')
+
     def get_pressure(self):
-        result = self.invoke('PG')
-        if result[:2] == 'PG':
-            return result[2:]
-        #Вернем ошибку
-        return result
+        return self.get('PG')
+
+    def get_light(self):
+        result = self.get('LG')
+        if result == '1':
+            return True
+        return False
 
 
 if __name__ == '__main__':

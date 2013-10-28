@@ -16,6 +16,8 @@ class Config(object):
         self.log_level    = logging.getLevelName(config.get('log_level', 'info').upper())
         self.pid_filename = config.get('pid_filename', 'pid/server.pid')
         self.pid_filename = os.path.abspath(os.path.join(config_dir, self.pid_filename))
+        self.db_url       = config.get('db_url', 'app.db')
+        self.db_url       = os.path.abspath(os.path.join(config_dir, self.db_url))
 
     def __getattr__(self, name):
         return None

@@ -91,7 +91,7 @@ if __name__ == '__main__':
 
     target = functools.partial(start_server, config, command)
     server = Server(target, pid, stdout, stderr)
-
+    
     if action == 'start':
         server.start()
     elif action == 'stop':

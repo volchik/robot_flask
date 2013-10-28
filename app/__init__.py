@@ -1,4 +1,5 @@
 import logging
+import os
 from flask import Flask
 
 logger = logging.getLogger(__name__)
@@ -11,6 +12,8 @@ from app import robot_client
 def prepare_app(config, command):
     global app
     app.debug = config.server_debug
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + config.db_url
+    app.secret_key = os.urandom(24)
     assert not hasattr(app, 'camera')
     assert not hasattr(app, 'robot')
     assert not hasattr(app, 'cmd_dict')
