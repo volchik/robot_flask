@@ -12,6 +12,7 @@ from app import robot_client
 def prepare_app(config, command):
     global app
     app.debug = config.server_debug
+    app.auth_timeout = config.auth_timeout
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + config.db_url
     app.secret_key = os.urandom(24)
     assert not hasattr(app, 'camera')

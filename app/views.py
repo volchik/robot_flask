@@ -13,12 +13,18 @@ from flask import request, current_app, stream_with_context, abort
 from flask import session
 import time
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
 ###############  Авторизация  #########################
 def logged():
     if session.get('logged'):
+        userexpire = session.get('expire')
+        username   = session.get('username','')
+        #превышено время действия авторизации
+        if userexpire < time.time():
+            return False
         return True
     return False
 
@@ -27,43 +33,43 @@ def requires_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if not logged():
-            return redirect(url_for('login'))
-        #проверки пройдены
-        userexpire = session.get('expire')
-        username   = session.get('username','')
-
-        #превышено время действия авторизации
-        if userexpire < time.time():
-            return redirect(url_for('logout'))
-
+            next = request.path
+            #если запрос на главной странице, то не передаем страницу для перехода
+            if next == '/':
+                return redirect(url_for('login'))
+            return redirect(url_for('login')+'?next='+request.path)
         return f(*args, **kwargs)
     return decorated
 
+
 ###############  Обработка запросов  ##################
-@app.route('/')
+@app.route('/', methods=["GET", "POST"])
 @requires_auth
 def main():
+    #пока главная страница это страница аутентификации
     return redirect(url_for('login'))
 
 
-@app.route('/index')
+@app.route('/index', methods=["GET", "POST"])
 @requires_auth
 def index():
     lighton = current_app.robot.get_light()
-    logger.info('Запрос состояния освещения, получено %s' % lighton)
+    logger.debug('Запрос состояния освещения, получено %s' % lighton)
     return render_template("index.html", title=None, mjpeg=True, lighton=lighton)
 
 
-@app.route('/mobile')
+@app.route('/mobile', methods=["GET", "POST"])
 @requires_auth
 def mobile():
     lighton = current_app.robot.get_light()
-    logger.info('Запрос состояния освещения, получено %s' % lighton)
+    logger.debug('Запрос состояния освещения, получено %s' % lighton)
     return render_template("index.html", title=None, mjpeg=False, lighton=lighton)
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    args = '&'.join(['='.join(i) for i in request.args.items()])
+    logger.info('[login] '+request.path+'?'+args)
     if request.method == 'POST':
         username = request.form.get('username','')
         password = request.form.get('password','')
@@ -74,13 +80,14 @@ def login():
                 logger.info('Вход пользователя %s' % username)
                 session['username'] = username
                 session['logged']   = 1
-                session['expire']   = time.time()+60 #60 sec
+                session['expire']   = time.time() + current_app.auth_timeout #auth_timeout sec
                 session['remember'] = remember
-                return redirect(request.args.get("next") or url_for("index"))
+                return redirect(request.args.get('next') or url_for("index"))
         return render_template('login.html', \
                                title = 'Логин/пароль (регистрация)', \
                                error = 'Неправильное имя пользователя или пароль', \
-                               username = username)
+                               username = username, \
+                               next = args)
 
     #запрос пароля
     username = session.get('username','')
@@ -89,11 +96,14 @@ def login():
                            title = 'Логин/пароль (регистрация)', \
                            error = None, \
                            username = username, \
-                           remember = remember)
+                           remember = remember, \
+                           next = args)
 
 
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
+    args = '&'.join(['='.join(i) for i in request.args.items()])
+    logger.info('[logout] '+request.path+'?'+args)
     logger.info('Выход пользователя %s' % session.get('username',''))
     session.pop('logged', None)
     session.pop('expire', None)
@@ -106,7 +116,9 @@ def logout():
 @app.route('/mjpeg')
 def mjpeg():
     if not logged():
-        abort(401)
+        image = current_app.camera.dummy_image(os.path.join(os.path.dirname(__file__), 'static', 'dummy/401.jpg'))
+        logger.debug('Отправка кадра %s байт' % len(image))
+        return Response(image, 200, content_type='image/jpeg')
 
     put_date = current_app.camera.put_date
     if request.args.get('nodate',None) == '1':
@@ -156,7 +168,9 @@ def mjpeg():
 @app.route('/jpeg')
 def jpeg():
     if not logged():
-        abort(401)
+        image = current_app.camera.dummy_image(os.path.join(os.path.dirname(__file__), 'static', 'dummy/401.jpg'))
+        logger.debug('Отправка кадра %s байт' % len(image))
+        return Response(image, 200, content_type='image/jpeg')
 
     put_date = current_app.camera.put_date
     if request.args.get('nodate',None) == '1':
@@ -202,7 +216,7 @@ def invoke(command):
     method = getattr(current_app.robot, command, None)
     if callable(method):
         logger.info('Получена комманда: %s(%s)' % (command, ', '.join(['='.join(i) for i in request.args.items()])))
-        result = method(**request.args)
+        result = str(method(**request.args))
         if result:
             logger.info('Ответ на комманду "%s": %s' % (command, result))
             return app.cmd_dict.getCommandText(result)
@@ -226,6 +240,11 @@ def set_resolution(mode):
 @app.errorhandler(401)
 def page_access_denied(error):
     return render_template('error_401.html', title='Доступ запрещен'), 401
+
+
+@app.errorhandler(403)
+def page_access_denied(error):
+    return render_template('error_401.html', title='Доступ запрещен'), 403
 
 
 @app.errorhandler(404)

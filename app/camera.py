@@ -3,7 +3,9 @@
 import os
 import time
 from cv2 import cv
+import logging
 
+logger = logging.getLogger(__name__)
 
 class Camera(object):
     def __init__(self, cam_num, cam_mode=1, cam_fps=-1, cam_quality=70, cam_put_date=False):
@@ -92,7 +94,16 @@ class Camera(object):
         cv2mat = cv.EncodeImage('.jpeg', img, (cv.CV_IMWRITE_JPEG_QUALITY, self.quality))
         return cv2mat.tostring()
 
- 
+    def dummy_image(self, filename):
+        try:
+            f = open(filename)
+            image = f.read()
+            f.close()
+            return image
+        except IOError:
+            logger.error('Файл не найден: %s' % filename)
+            return ''
+
 
 if __name__ == '__main__':
     pass

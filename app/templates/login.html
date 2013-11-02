@@ -5,7 +5,7 @@
     <p align="center"><b>{{ error }}</b></p>
   {% endif %}
     <div class="auth-form" id="login"> 
-      <form action="/login" method="post" id="form-auth">
+      <form action="/login{% if next %}?{{ next }}{% endif %}" method="POST" id="form-auth">
       <div class="auth-form-header"> 
         <h1>Аутентификация</h1> 
       </div> 

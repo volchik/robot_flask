@@ -23,15 +23,17 @@
 {% endblock %}
 {% block body %} bgcolor="C0C0C0" onKeyDown="keyEvent()" {% endblock%}
 {% block content %}
-    <form action="/logout" id="myform">
-        <p align="right">
+        <form action="/logout" id="myform" method="POST">
+          <p align="right">
             {% if mjpeg %}
-            <input class="button" type="submit" value="Мобильный вид" onClick='document.getElementById("myform").action="/mobile"'/>
+            <input class="button" type="submit" value="Мобильный вид" onClick='document.getElementById("myform").action="/mobile"'/> 
             {% else %}
             <input class="button" type="submit" value="Стандартный вид" onClick='document.getElementById("myform").action="/index"'/>
             {% endif %}
             <input class="button" type="submit" value="Выход"/>
-        </p>
+          </p>
+        </form>
+
         <table border="0" align="right" cellspacing="0" cellpadding="0" color="black">
         <tr>
             <td align="center">
@@ -111,9 +113,11 @@
         </tr>
         <tr>
             <td align="center" colspan="3">
+              <form>
                 <input class="button" type="button" value="480x360" onclick="SetResolution(0)"/>
                 <input class="button" type="button" value="640x480" onclick="SetResolution(1)"/>
                 <input class="button" type="button" value="1280x1024" onclick="SetResolution(2)"/>
+              </form>
             </td>
         </tr>
         <tr height="20">
