@@ -75,10 +75,10 @@ class Robot:
             logger.debug('Получено: %s' % result)
         except:
             logger.error('Ошибка отправки/получения: "%s"' % sys.exc_info()[1])
-            return sys.exc_info()[1]
+            result = sys.exc_info()[1]
         #Снимем флаг зянятости
         self.busy = False
-        if check and result[0:len(command)] != command:
+        if check and result[:len(command)] != command:
             return u'Error: Отправлено: "%s" Получено: "%s"' % (command, result)
         else:
             return result
