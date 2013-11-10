@@ -16,6 +16,10 @@ class Camera(object):
         self.quality = cam_quality
         self.put_date= cam_put_date
         self.textColor = (255,255,255)
+        logger.debug('Номер камеры: %s' % (self.num))
+        logger.debug('Разрешение: %sx%s' % (self.width, self.height))
+        logger.debug('Кадров в секунду: %s' % (self.fps))
+        logger.debug('Качество: %s' % (self.quality))
 
     @property
     def width(self):

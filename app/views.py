@@ -127,9 +127,9 @@ def mjpeg():
     def jpeg_generator(camera):
         fps   = camera.fps
         if fps > 0:
-            delay = 1 / fps
+            delay = 1.0 / fps
         else:
-            delay = 0.02
+            delay = 0.05
         frameTime = time.time()
         frameCount = 0
         frameFps = 0
@@ -218,7 +218,7 @@ def invoke(command):
         logger.info('Получена комманда: %s(%s)' % (command, ', '.join(['='.join(i) for i in request.args.items()])))
         result = str(method(**request.args))
         if result:
-            logger.info('Ответ на комманду "%s": %s' % (command, result))
+            logger.debug('Ответ на комманду "%s": %s' % (command, result))
             return app.cmd_dict.getCommandText(result)
         else:
             return '%s - OK???' % command
