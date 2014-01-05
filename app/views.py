@@ -54,22 +54,36 @@ def main():
 @requires_auth
 def index():
     lighton = current_app.robot.get_light()
+    cam_mode = current_app.camera.mode
+    resolutions = current_app.camera.get_resolutions()
     logger.debug('Запрос состояния освещения, получено %s' % lighton)
-    return render_template("index.html", title=None, mjpeg=True, lighton=lighton)
+    return render_template("index.html", \
+                           title=None, \
+                           mjpeg=True, \
+                           lighton=lighton, \
+                           cam_mode=cam_mode, \
+                           resolutions=resolutions)
 
 
 @app.route('/mobile', methods=["GET", "POST"])
 @requires_auth
 def mobile():
     lighton = current_app.robot.get_light()
+    cam_mode = current_app.camera.mode
+    resolutions = current_app.camera.get_resolutions()
     logger.debug('Запрос состояния освещения, получено %s' % lighton)
-    return render_template("index.html", title=None, mjpeg=False, lighton=lighton)
+    return render_template("index.html", \
+                           title=None, \
+                           mjpeg=False, \
+                           lighton=lighton, \
+                           cam_mode=cam_mode, \
+                           resolutions=resolutions)
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     args = '&'.join(['='.join(i) for i in request.args.items()])
-    logger.info('[login] '+request.path+'?'+args)
+    logger.info(request.path+'?'+args)
     if request.method == 'POST':
         username = request.form.get('username','')
         password = request.form.get('password','')
@@ -87,6 +101,7 @@ def login():
                                title = 'Логин/пароль (регистрация)', \
                                error = 'Неправильное имя пользователя или пароль', \
                                username = username, \
+                               remember = remember, \
                                next = args)
 
     #запрос пароля
@@ -103,7 +118,7 @@ def login():
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
     args = '&'.join(['='.join(i) for i in request.args.items()])
-    logger.info('[logout] '+request.path+'?'+args)
+    logger.info(request.path+'?'+args)
     logger.info('Выход пользователя %s' % session.get('username',''))
     session.pop('logged', None)
     session.pop('expire', None)

@@ -58,7 +58,8 @@ function keyEvent() {
   $("#key").append(status);
 }
 
-function SetResolution(r) {
+function SetResolution2(r) {
+       
        $.ajax({
                 type: "POST",
                 url: "/set_resolution/" + r,                
@@ -77,7 +78,7 @@ function ShowTemperature() {
                 cache: false,
                 success: function(html){
                         $("#temperature").empty();
-                        $("#temperature").append("Температура: <b>"+html+"</b> грудусов Цельсия");
+                        $("#temperature").append("<b>"+html+"&deg;C</b>"); 
                 }
         });
 }
@@ -89,7 +90,7 @@ function ShowPressure() {
                 cache: false,
                 success: function(html){
                         $("#pressure").empty();
-                        $("#pressure").append("Давление: <b>"+html+"</b> мм. рт. ст.");
+                        $("#pressure").append("<b>"+html+" мм. рт. ст.</b>");
                 }
         });
 }

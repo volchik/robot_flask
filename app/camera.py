@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 class Camera(object):
     def __init__(self, cam_num, cam_mode=1, cam_fps=-1, cam_quality=70, cam_put_date=False):
         self.capture = cv.CaptureFromCAM(cam_num)
+        self.resolutions = {0: (352,288), 1: (640,480), 2: (1280,720), 3: (1280,1024)}
         self.num     = cam_num
         self.mode    = cam_mode
         self.fps     = cam_fps
@@ -56,15 +57,13 @@ class Camera(object):
     def mode(self, value):
         self._mode = value
         self.font  = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 0.5*(self.mode+1), 0.5*(self.mode+1), 0, self.mode+1, 8)
-        if value == 0:
-            self.width  = 352
-            self.height = 288
-        elif value == 1:
+        resolution = self.resolutions.get(value)
+        if resolution != None:
+            self.width  = resolution[0]
+            self.height = resolution[1]
+        else:
             self.width  = 640
             self.height = 480
-        elif value == 2:
-            self.width  = 1280
-            self.height = 1024
 
     @property
     def textColor(self):
@@ -107,6 +106,9 @@ class Camera(object):
         except IOError:
             logger.error('Файл не найден: %s' % filename)
             return ''
+
+    def get_resolutions(self):
+        return self.resolutions
 
 
 if __name__ == '__main__':
