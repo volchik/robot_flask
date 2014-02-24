@@ -1,0 +1,28 @@
+{% extends "admin/base.html" %}
+{% block content %}
+  <table class="table table-hover">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Логин</th>
+      <th>E-mail</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users: %}
+    <tr>
+      <td>{{ user.id }}</td>
+      <td>{{ user.username }}</td>
+      <td>{{ user.email }}</td>
+      <td>
+        <a href="#"><span class="glyphicon glyphicon-pencil"></span></a>
+        <a href="#"><span class="glyphicon glyphicon-trash"></span></a>
+      </td>
+    </tr>     
+    {% endfor %}
+  </tbody>
+  </table>
+
+{% endblock %}
+

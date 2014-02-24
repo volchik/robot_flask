@@ -7,46 +7,29 @@ sys.setdefaultencoding('utf-8')
 from app import app
 from db import db, User
 from functools import wraps
-import logging
 from flask import Response, render_template, redirect, url_for
 from flask import request, current_app, stream_with_context, abort
 from flask import session
 import time
 import logging
 import os
+###############  Авторизация  #########################
+from auth import *
+###############  Админка  #############################
+from admin import *
+
 
 logger = logging.getLogger(__name__)
-
-###############  Авторизация  #########################
-def logged():
-    if session.get('logged'):
-        userexpire = session.get('expire')
-        username   = session.get('username','')
-        #превышено время действия авторизации
-        if userexpire < time.time():
-            return False
-        return True
-    return False
-
-
-def requires_auth(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not logged():
-            next = request.path
-            #если запрос на главной странице, то не передаем страницу для перехода
-            if next == '/':
-                return redirect(url_for('login'))
-            return redirect(url_for('login')+'?next='+request.path)
-        return f(*args, **kwargs)
-    return decorated
 
 
 ###############  Обработка запросов  ##################
 @app.route('/', methods=["GET", "POST"])
 @requires_auth
 def main():
-    #пока главная страница это страница аутентификации
+    #для авторизованного на главную страницу
+    #если не авторизован, то на страницу аутентификации
+    if logged():
+      return redirect(url_for('index'))
     return redirect(url_for('login'))
 
 
@@ -197,7 +180,17 @@ def jpeg():
 
 @app.route('/get_temperature')
 def get_temperature():
-    if not logged():
+    get_logged = False  
+    if request.method == 'GET' and request.args.get('username'):
+        username = request.args.get('username','')
+        password = request.args.get('password','')
+        user = User.query.filter_by(username=username).first()
+        if user:
+            if user.check_password(password):
+                logger.info('Вход пользователя %s' % username)
+                get_logged = True
+
+    if not logged() and not get_logged:
         return 'Нет доступа'
 
     logger.debug('Запрос температуры')
@@ -208,7 +201,17 @@ def get_temperature():
 
 @app.route('/get_pressure')
 def get_pressure():
-    if not logged():
+    get_logged = False
+    if request.method == 'GET' and request.args.get('username'):
+        username = request.args.get('username','')
+        password = request.args.get('password','')
+        user = User.query.filter_by(username=username).first()
+        if user:
+            if user.check_password(password):
+                logger.info('Вход пользователя %s' % username)
+                get_logged = True
+
+    if not logged() and not get_logged:
         return 'Нет доступа'
 
     logger.debug('Запрос давления')
@@ -270,3 +273,9 @@ def page_not_found(error):
 @app.errorhandler(500)
 def page_not_found(error):
     return render_template('error_404.html', title='Страница не найдена'), 500
+
+@app.route('/test', methods=["GET", "POST"])
+@requires_auth
+def test():
+    return render_template("test.html")
+

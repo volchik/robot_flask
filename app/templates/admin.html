@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block style%}
+    <!-- Custom styles for this template -->
+    <link href="/static/css/navbar-fixed-top.css" rel="stylesheet">
+<!--    <link href="/static/css/nav.css" rel="stylesheet"> -->
+
+    <!-- Custom styles for this template -->
+    <link href="/static/css/offcanvas.css" rel="stylesheet">
+    <style>
+      .word {
+             word-break: break-all;
+      }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container">
+
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-left">
+            <li><a href="{{ main_url }}">Главная</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="/logout">Выход</a></li>
+          </ul>
+        </div>
+
+      </div>  <!-- /container -->
+    </div>  <!-- /navbar -->
+
+    <div class="container">
+      <div class="row row-offcanvas row-offcanvas-left">
+
+        <div class="col-xs-3 col-sm-3 sidebar-offcanvas" id="sidebar" role="navigation">
+          <div class="list-group">
+            <a href="/admin/users" class="word list-group-item">Пользователи</a>
+            <a href="#" class="word list-group-item">Группы</a>
+            <a href="#" class="word list-group-item">Права</a>
+            <a href="#" class="word list-group-item">...</a>
+          </div>
+        </div><!--/span-->
+
+        <div class="col-xs-12 col-sm-9">
+          <p class="pull-left visible-xs">
+            <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas">Меню</button>
+          </p>
+          <div class="jumbotron">
+            <img class="img-responsive img-rounded" src="/static/dummy/401.jpg"/>
+          </div><!--/jumbotron-->
+        </div><!--/span-->
+
+      </div><!--/row-->
+
+    </div> <!-- /container -->
+{% endblock %}
+{% block script_end%}
+    <script src="/static/js/offcanvas.js"></script>
+{% endblock %}

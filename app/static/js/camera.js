@@ -5,7 +5,5 @@ function OnBtnRefresh() {
 }
 
 function OnImgLoad() {
-        setTimeout("OnBtnRefresh()",50);
+        setTimeout("OnBtnRefresh()",100);
 }
-
-

@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block style%}
     <!-- Custom styles for this template -->
-    <link href="/static/css/nav.css" rel="stylesheet">
+    <link href="/static/css/navbar-fixed-top.css" rel="stylesheet">
+<!--    <link href="/static/css/nav.css" rel="stylesheet"> -->
 {% endblock %}
 {% block script%}
     <script language="Javascript">
@@ -34,31 +35,51 @@
 {% endblock %}
 {% block body %} onKeyDown="keyEvent()" {% endblock%}
 {% block content %}
-    <div class="container">
-      <ul class="nav nav-pills pull-left">
-        {% if mjpeg %}
-        <li><a href="/mobile">Мобильный вид</a></li>
-        {% else %}
-        <li class="active"><a href="/index">Мобильный вид</a></li>
-        {% endif %}
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown">Разрешение <b class="caret"></b></a>
-          <ul class="dropdown-menu">
-            {% for r in resolutions %}
-            <li id="resolution{{ r }}" {% if r == cam_mode %}class="disabled"{% endif %}>
-              <a href="#" onclick="SetResolution({{ r }})">{{ resolutions.get(r)[0] }} x {{ resolutions.get(r)[1] }}</a>
-            </li>
-            {% endfor %}
+    <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container">
+
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        </div>
+
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-left">
+            {% if mjpeg %}
+            <li><a href="/admin/?last=/index">Администрирование</a></li>
+            {% else %}
+            <li><a href="/admin/?last=/mobile">Администрирование</a></li>
+            {% endif %}
+            {% if mjpeg %}
+            <li class="active"><a href="/mobile">M-JPEG</a></li>
+            {% else %}
+            <li><a href="/index">M-JPEG</a></li>
+            {% endif %}
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Разрешение <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                {% for r in resolutions %}
+                <li id="resolution{{ r }}" {% if r == cam_mode %}class="disabled"{% endif %}>
+                  <a href="#" onclick="SetResolution({{ r }})">{{ resolutions.get(r)[0] }} x {{ resolutions.get(r)[1] }}</a>
+                </li>
+                {% endfor %}
+              </ul>
+            </li><!--/.dropdown-menu -->
+            <li id="light_active" {% if lighton %}class="active"{% endif %}><a href="#" onclick="LightOn()">Фонарь</a></li>
           </ul>
-        </li><!--/.dropdown-menu -->
-        <li id="light_active" {% if lighton %}class="active"{% endif %}><a href="#" onclick="LightOn()">Фонарь</a></li>
-      </ul>
-      <ul class="nav nav-pills pull-right">
-        <li><a><div id="temperature"></div></a></li>
-        <li><a><div id="pressure"></div></a></li>
-        <li><a href="/logout">Выход</a></li>
-      </ul>
-    </div>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a><div id="temperature"></div></a></li>
+            <li><a><div id="pressure"></div></a></li>
+            <li><a href="/logout">Выход</a></li>
+          </ul>
+        </div>
+
+      </div>  <!-- /container -->
+    </div>  <!-- /navbar -->
 
     <div class="container">
       <table border="0" align="center">
@@ -97,7 +118,7 @@
                 <td width="50"></td>
                 <td width="50">
                   <button type="button" class="btn btn-default" onclick="send('move_forward');">
-                    <span class="glyphicon glyphicon-chevron-up"></span>
+                    <span class="glyphicon glyphicon-arrow-up"></span>
                   </button>
                 </td>
                 <td width="50"></td>
@@ -105,13 +126,13 @@
               <tr height="50">
                 <td>
                   <button type="button" class="btn btn-default" onclick="send('move_left');">
-                    <span class="glyphicon glyphicon-chevron-left"></span>
+                    <span class="glyphicon glyphicon-arrow-left"></span>
                   </button>
                 </td>
                 <td></td>
                 <td>
                   <button type="button" class="btn btn-default" onclick="send('move_right');">
-                    <span class="glyphicon glyphicon-chevron-right"></span>
+                    <span class="glyphicon glyphicon-arrow-right"></span>
                   </button>
                 </td>
               </tr>
@@ -119,7 +140,7 @@
                 <td></td>
                 <td>
                   <button type="button" class="btn btn-default" onclick="send('move_backward');">
-                    <span class="glyphicon glyphicon-chevron-down"></span>
+                    <span class="glyphicon glyphicon-arrow-down"></span>
                   </button>
                 </td>
                 <td></td>
@@ -146,5 +167,7 @@
 {% endblock %}
 {% block script_end%}
     <script src="/static/js/command.js"></script>
+    {% if not mjpeg %}
     <script src="/static/js/camera.js"></script>
+    {% endif %}
 {% endblock %}
