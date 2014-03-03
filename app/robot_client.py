@@ -132,6 +132,8 @@ class Robot:
             return True
         return False
 
+    def get_realvolts(self):
+        return self.get('VG')
 
 if __name__ == '__main__':
     pass

@@ -76,7 +76,7 @@ def login():
             if user.check_password(password):
                 logger.info('Вход пользователя %s' % username)
                 session['username'] = username
-                session['logged']   = 1
+                session['logged']   = True
                 session['expire']   = time.time() + current_app.auth_timeout #auth_timeout sec
                 session['remember'] = remember
                 return redirect(request.args.get('next') or url_for("index"))
@@ -224,6 +224,27 @@ def get_pressure():
         return result
     logger.debug('Ответ на запрос давления: %s' % pressure)
     return pressure
+
+
+@app.route('/get_realvolts')
+def get_realvolts():
+    get_logged = False
+    if request.method == 'GET' and request.args.get('username'):
+        username = request.args.get('username','')
+        password = request.args.get('password','')
+        user = User.query.filter_by(username=username).first()
+        if user:
+            if user.check_password(password):
+                logger.info('Вход пользователя %s' % username)
+                get_logged = True
+
+    if not logged() and not get_logged:
+        return 'Нет доступа'
+
+    logger.debug('Запрос напряжения питания')
+    result = current_app.robot.get_realvolts()
+    logger.debug('Ответ на запрос напряжения питания: %s' % result)
+    return result
 
 
 @app.route('/invoke/<command>', methods=['POST', 'GET'])

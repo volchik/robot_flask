@@ -83,6 +83,7 @@ function ShowTemperature() {
         });
 }
 
+
 function ShowPressure() {
         $.ajax({
                 type: "GET",
@@ -95,9 +96,24 @@ function ShowPressure() {
         });
 }
 
+
+function ShowRealVolts() {
+        $.ajax({
+                type: "GET",
+                url: "/get_realvolts",
+                cache: false,
+                success: function(html){
+                        $("#realvolts").empty();
+                        $("#realvolts").append("<b>"+html+"В</b>");
+                }
+        });
+}
+
+
 function Show() {
         ShowTemperature();
         ShowPressure();
+        ShowRealVolts();
 }
 
 $(document).ready(function(){
