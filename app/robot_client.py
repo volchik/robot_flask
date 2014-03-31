@@ -117,8 +117,8 @@ class Robot:
         result = self.invoke(command)
         if result[:len(command)] == command:
             return result[len(command):]
-        #Вернем ошибку
-        return result
+        #Вернем прочерк
+        return '--'
 
     def get_temperature(self):
         return self.get('TG')
