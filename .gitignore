@@ -2,3 +2,5 @@
 *.pid
 *.pyc
 *.db
+*.crt
+*.key
