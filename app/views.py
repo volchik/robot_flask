@@ -66,7 +66,7 @@ def mobile():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     args = '&'.join(['='.join(i) for i in request.args.items()])
-    logger.info(request.path+'?'+args)
+    logger.info(request.remote_addr +' ' + request.path+'?'+args)
     if request.method == 'POST':
         username = request.form.get('username','')
         password = request.form.get('password','')
@@ -101,7 +101,7 @@ def login():
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
     args = '&'.join(['='.join(i) for i in request.args.items()])
-    logger.info(request.path+'?'+args)
+    logger.info(request.remote_addr +' ' + request.path+'?'+args)
     logger.info('Выход пользователя %s' % session.get('username',''))
     session.pop('logged', None)
     session.pop('expire', None)
