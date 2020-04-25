@@ -1,8 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
-import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
 
 import logging
 import sys
@@ -54,7 +51,7 @@ def start_server(config, command):
 class Server(Daemon):
     def __init__(self, target, pidfile, stdout='/dev/null', stderr='/dev/null'):
         self.target = target
-        super(Server, self).__init__(pidfile, '/dev/null', stdout, stderr)
+        super(Server, self).__init__('/dev/null', stdout, stderr)
 
 
     def run(self):
@@ -66,9 +63,9 @@ if __name__ == '__main__':
     action = None
     if len(sys.argv) > 1:
         action = sys.argv[1]
-    
+
     if not action in ('start', 'stop', 'restart', 'run'):
-        print 'Запуск: %s start|stop|restart|run' % sys.argv[0]
+        print('Запуск: {} start|stop|restart|run'.format(sys.argv[0]))
         exit(1)
 
     basedir  = os.path.abspath(os.path.dirname(__file__))
@@ -91,7 +88,7 @@ if __name__ == '__main__':
 
     target = functools.partial(start_server, config, command)
     server = Server(target, pid, stdout, stderr)
-    
+
     if action == 'start':
         server.start()
     elif action == 'stop':

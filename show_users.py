@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 
 #Создание пользователей
@@ -19,6 +19,6 @@ if __name__ == '__main__':
 
     users = User.query.all()
     for user in users:
-      print user
+      print(user)
 
-    print len(users)
+    print(len(users))

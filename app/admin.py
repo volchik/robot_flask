@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
-
 from app import app
 from db import db, User
 from flask import Response, render_template, redirect, url_for
