@@ -121,7 +121,7 @@ def mjpeg():
     put_date = current_app.camera.put_date
     if request.args.get('nodate',None) == '1':
         put_date = False
-   
+
     def jpeg_generator(camera):
         fps   = camera.fps
         if fps > 0:
@@ -165,7 +165,17 @@ def mjpeg():
 
 @app.route('/jpeg')
 def jpeg():
-    if not logged():
+    get_logged = False
+    if request.method == 'GET' and request.args.get('username'):
+        username = request.args.get('username','')
+        password = request.args.get('password','')
+        user = User.query.filter_by(username=username).first()
+        if user:
+            if user.check_password(password):
+                logger.info('Вход пользователя %s' % username)
+                get_logged = True
+
+    if not logged() and not get_logged:
         image = current_app.camera.dummy_image(os.path.join(os.path.dirname(__file__), 'static', 'dummy/401.jpg'))
         logger.debug('Отправка кадра %s байт' % len(image))
         return Response(image, 200, content_type='image/jpeg')
@@ -180,9 +190,29 @@ def jpeg():
 
 @app.route('/get_temperature')
 def get_temperature():
-    get_logged = False  
+    get_logged = False
     if request.method == 'GET' and request.args.get('username'):
         username = request.args.get('username','')
+    get_logged = False
+    if request.method == 'GET' and request.args.get('username'):
+        username = request.args.get('username','')
+        password = request.args.get('password','')
+        user = User.query.filter_by(username=username).first()
+        if user:
+            if user.check_password(password):
+                logger.info('Вход пользователя %s' % username)
+                get_logged = True
+
+    get_logged = False
+    if request.method == 'GET' and request.args.get('username'):
+        username = request.args.get('username','')
+        password = request.args.get('password','')
+        user = User.query.filter_by(username=username).first()
+        if user:
+            if user.check_password(password):
+                logger.info('Вход пользователя %s' % username)
+                get_logged = True
+
         password = request.args.get('password','')
         user = User.query.filter_by(username=username).first()
         if user:
