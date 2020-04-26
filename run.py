@@ -42,7 +42,9 @@ def start_server(config, command):
                             local_app)
     factory = Site(resource)
     if config.server_ssl:
-        sslContextFactory = DefaultOpenSSLContextFactory(config.server_ssl_key, config.server_ssl_crt)
+        ssl_key = os.path.join(basedir, config.server_ssl_key)
+        ssl_crt = os.path.join(basedir, config.server_ssl_crt)
+        sslContextFactory = DefaultOpenSSLContextFactory(ssl_key, ssl_crt)
         endpoint = SSL4ServerEndpoint(reactor, config.server_port, sslContextFactory)
     else:
         endpoint = TCP4ServerEndpoint(reactor, config.server_port)
