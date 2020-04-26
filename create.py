@@ -18,7 +18,7 @@ if __name__ == '__main__':
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + config.db_url
 
     db.create_all()
-    
+
     user = User.query.filter_by(username='admin').first()
     if not user:
         user = User('admin', 'qwerty', 'admin@example.com')

@@ -71,7 +71,7 @@ if __name__ == '__main__':
     action = None
     if len(sys.argv) > 1:
         action = sys.argv[1]
-    
+
     if not action in ('start', 'stop', 'restart', 'run'):
         print 'Запуск: %s start|stop|restart|run' % sys.argv[0]
         exit(1)
@@ -96,7 +96,7 @@ if __name__ == '__main__':
 
     target = functools.partial(start_server, config, command)
     server = Server(target, pid, stdout, stderr)
-    
+
     if action == 'start':
         server.start()
     elif action == 'stop':

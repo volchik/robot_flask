@@ -27,7 +27,7 @@ class Robot:
             #Открытие порта
             self.serial = serial.Serial(self.port, self.baudrate, timeout = self.timeout)
             #Ожидание инициализации...
-            time.sleep(2) 
+            time.sleep(2)
             if self.serial.isOpen():
                 logger.info('Подключен к устройству: %s' % self.port)
             else:
