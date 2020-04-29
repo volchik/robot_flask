@@ -305,6 +305,13 @@ def set_resolution(mode):
     logger.info('Смена режима работы камеры: %sx%s' % (current_app.camera.width, current_app.camera.height))
     return '%sx%s' % (current_app.camera.width, current_app.camera.height)
 
+@app.route('/.well-known/acme-challenge/<string:file>')
+def get_file(file):
+    f = open('app/data/' + file, 'r')
+    data = f.read()
+    f.close()
+    logger.info('Загрузка файла "%s"' % (file))
+    return data
 
 @app.errorhandler(401)
 def page_access_denied(error):
