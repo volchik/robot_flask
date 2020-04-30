@@ -9,6 +9,9 @@ logger = logging.getLogger(__name__)
 
 class Camera(object):
     def __init__(self, cam_num, cam_mode=1, cam_fps=-1, cam_quality=70, cam_put_date=False):
+        self.cv_version = cv2.__version__
+        logger.debug('OpenCV version %s' % (self.cv_version))
+
         #self.capture = cv2.CaptureFromCAM(cam_num)
         self.capture = cv2.VideoCapture(cam_num)
         self.resolutions = {0: (352,288), 1: (640,480), 2: (1280,720), 3: (1280,1024)}

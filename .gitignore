@@ -2,5 +2,5 @@
 *.pid
 *.pyc
 *.db
-*.crt
-*.key
+ssl/
+app/data/
