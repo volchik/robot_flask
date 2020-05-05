@@ -106,9 +106,9 @@ class Camera(object):
             img = cv2.cv.QueryFrame(self.capture)
 
             #Задержка для нормализации периодического процесса захвата (см. документацию)
-            #По непонятной причине из-за cv2.WaitKey вылетает сервер
+            #По непонятной причине из-за cv2.cv.WaitKey вылетает сервер
             #с ошибкой "Ошибка сегментирования (сделан дамп памяти)" после смены размера картинки
-            #cv2.WaitKey(10)
+            #cv2.cv.WaitKey(10)
 
             if put_date:
                 text = time.strftime('%d/%m/%Y %H:%M:%S',time.localtime())
