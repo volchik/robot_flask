@@ -60,7 +60,7 @@ def mobile():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     args = '&'.join(['='.join(i) for i in request.args.items()])
-    logger.info(request.path+'?'+args)
+    logger.info(request.remote_addr +' ' + request.path+'?'+args)
     if request.method == 'POST':
         username = request.form.get('username','')
         password = request.form.get('password','')
@@ -95,7 +95,7 @@ def login():
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
     args = '&'.join(['='.join(i) for i in request.args.items()])
-    logger.info(request.path+'?'+args)
+    logger.info(request.remote_addr +' ' + request.path+'?'+args)
     logger.info('Выход пользователя %s' % session.get('username',''))
     session.pop('logged', None)
     session.pop('expire', None)
@@ -299,6 +299,13 @@ def set_resolution(mode):
     logger.info('Смена режима работы камеры: %sx%s' % (current_app.camera.width, current_app.camera.height))
     return '%sx%s' % (current_app.camera.width, current_app.camera.height)
 
+@app.route('/.well-known/acme-challenge/<string:file>')
+def get_file(file):
+    f = open('app/data/' + file, 'r')
+    data = f.read()
+    f.close()
+    logger.info('Загрузка файла "%s"' % (file))
+    return data
 
 @app.errorhandler(401)
 def page_access_denied(error):
