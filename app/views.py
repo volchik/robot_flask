@@ -271,7 +271,7 @@ def get_realvolts():
     return result
 
 
-@app.route('/invoke/<command>')
+@app.route('/invoke/<command>', methods=["POST"])
 def invoke(command):
     if not logged():
         return 'Нет доступа'
@@ -290,7 +290,7 @@ def invoke(command):
         abort(404)
 
 
-@app.route('/set_resolution/<int:mode>')
+@app.route('/set_resolution/<int:mode>', methods=["POST"])
 def set_resolution(mode):
     if not logged():
         return 'Нет доступа'
@@ -299,6 +299,7 @@ def set_resolution(mode):
     logger.info('Смена режима работы камеры: %sx%s' % (current_app.camera.width, current_app.camera.height))
     return '%sx%s' % (current_app.camera.width, current_app.camera.height)
 
+
 @app.route('/.well-known/acme-challenge/<string:file>')
 def get_file(file):
     f = open('app/data/' + file, 'r')
@@ -306,6 +307,7 @@ def get_file(file):
     f.close()
     logger.info('Загрузка файла "%s"' % (file))
     return data
+
 
 @app.errorhandler(401)
 def page_access_denied(error):
@@ -330,4 +332,3 @@ def page_not_found(error):
 @requires_auth
 def test():
     return render_template("test.html")
-
