@@ -5,7 +5,7 @@ reload(sys)
 sys.setdefaultencoding('utf-8')
 
 from app import app
-from db import db, User
+from app.db import db, User
 from functools import wraps
 from flask import Response, render_template, redirect, url_for
 from flask import request, current_app, stream_with_context, abort
@@ -14,16 +14,16 @@ import time
 import logging
 import os
 ###############  Авторизация  #########################
-from auth import *
+from app.auth import *
 ###############  Админка  #############################
-from admin import *
+from app.admin import *
 
 
 logger = logging.getLogger(__name__)
 
 
 ###############  Обработка запросов  ##################
-@app.route('/', methods=["GET", "POST"])
+@app.route('/')
 @requires_auth
 def main():
     #для авторизованного на главную страницу
@@ -33,7 +33,7 @@ def main():
     return redirect(url_for('login'))
 
 
-@app.route('/index', methods=["GET", "POST"])
+@app.route('/index')
 @requires_auth
 def index():
     lighton = current_app.robot.get_light()
@@ -48,7 +48,7 @@ def index():
                            resolutions=resolutions)
 
 
-@app.route('/mobile', methods=["GET", "POST"])
+@app.route('/mobile')
 @requires_auth
 def mobile():
     lighton = current_app.robot.get_light()
@@ -98,7 +98,7 @@ def login():
                            next = args)
 
 
-@app.route("/logout", methods=["GET", "POST"])
+@app.route("/logout")
 def logout():
     args = '&'.join(['='.join(i) for i in request.args.items()])
     logger.info(request.remote_addr +' ' + request.path+'?'+args)
@@ -277,7 +277,7 @@ def get_realvolts():
     return result
 
 
-@app.route('/invoke/<command>', methods=['POST', 'GET'])
+@app.route('/invoke/<command>')
 def invoke(command):
     if not logged():
         return 'Нет доступа'
@@ -296,7 +296,7 @@ def invoke(command):
         abort(404)
 
 
-@app.route('/set_resolution/<int:mode>', methods=['POST', 'GET'])
+@app.route('/set_resolution/<int:mode>')
 def set_resolution(mode):
     if not logged():
         return 'Нет доступа'
@@ -332,7 +332,7 @@ def page_not_found(error):
 def page_not_found(error):
     return render_template('error_404.html', title='Страница не найдена'), 500
 
-@app.route('/test', methods=["GET", "POST"])
+@app.route('/test')
 @requires_auth
 def test():
     return render_template("test.html")

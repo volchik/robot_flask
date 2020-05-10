@@ -4,8 +4,10 @@ from flask import Flask
 
 logger = logging.getLogger(__name__)
 app = Flask(__name__)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
 
-import views
+from app import views
 from app import camera
 from app import robot_client
 
@@ -14,7 +16,6 @@ def prepare_app(config, command):
     app.debug = config.server_debug
     app.auth_timeout = config.auth_timeout
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + config.db_url
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.secret_key = os.urandom(24)
     assert not hasattr(app, 'camera')
     assert not hasattr(app, 'robot')
@@ -25,4 +26,3 @@ def prepare_app(config, command):
     app.robot = robot_client.Robot(config.robot_port, config.robot_baudrate)
     app.cmd_dict = command
     return app
-
