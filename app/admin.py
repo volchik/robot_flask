@@ -1,5 +1,5 @@
 from app import app
-from db import db, User
+from app.db import db, User
 from flask import Response, render_template, redirect, url_for
 from flask import request, current_app, stream_with_context, abort
 from flask import session
@@ -7,7 +7,7 @@ import time
 import logging
 import os
 ###############  Авторизация  #########################
-from auth import *
+from app.auth import *
 
 logger = logging.getLogger(__name__)
 

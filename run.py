@@ -5,10 +5,11 @@ import logging
 import sys
 import os
 import functools
-from twisted.internet.endpoints import TCP4ServerEndpoint
+from twisted.internet.endpoints import TCP4ServerEndpoint, SSL4ServerEndpoint
 from twisted.web.server import Site
 from twisted.web.wsgi import WSGIResource
 from twisted.internet import reactor
+from twisted.internet.ssl import DefaultOpenSSLContextFactory
 from daemon import Daemon
 import app
 from config import Config
@@ -37,7 +38,13 @@ def start_server(config, command):
                             reactor.getThreadPool(),
                             local_app)
     factory = Site(resource)
-    endpoint = TCP4ServerEndpoint(reactor, config.server_port)
+    if config.server_ssl:
+        ssl_key = os.path.join(basedir, config.server_ssl_key)
+        ssl_crt = os.path.join(basedir, config.server_ssl_crt)
+        sslContextFactory = DefaultOpenSSLContextFactory(ssl_key, ssl_crt)
+        endpoint = SSL4ServerEndpoint(reactor, config.server_port, sslContextFactory)
+    else:
+        endpoint = TCP4ServerEndpoint(reactor, config.server_port)
     d = endpoint.listen(factory)
     logger.info('Старт сервера...')
     d.addCallback(lambda _: logger.info(u'Сервер стартовал...'))
