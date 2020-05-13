@@ -2,3 +2,5 @@
 *.pid
 *.pyc
 *.db
+ssl/
+app/data/
