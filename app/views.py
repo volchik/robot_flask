@@ -138,6 +138,11 @@ def mjpeg():
         last_time = time.time()
         while True:
             image = camera.get_image(put_date, frameSpeed, frameFps)
+
+            if image == '':
+                time.sleep(delay)
+                continue
+
             yield "--aaboundary\r\n"
             yield "Content-Type: image/jpeg\r\n"
             yield "Content-length: " + str(len(image)) + "\r\n\r\n"
