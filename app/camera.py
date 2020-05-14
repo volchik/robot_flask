@@ -14,10 +14,7 @@ class Camera(object):
         self.cv_version_major = version[0]
         self.cv_version_minor = version[1]
 
-        if self.cv_version_major == '2':
-            self.capture = cv2.cv.CaptureFromCAM(cam_num)
-        else:
-            self.capture = cv2.VideoCapture(cam_num)
+        self.capture = cv2.VideoCapture(cam_num)
 
         self.resolutions = {0: (352,288), 1: (640,480), 2: (1280,720), 3: (1280,1024)}
         self.num     = cam_num
@@ -38,7 +35,7 @@ class Camera(object):
     @width.setter
     def width(self, value):
         if self.cv_version_major == '2':
-            cv2.cv.SetCaptureProperty(self.capture, cv2.cv.CV_CAP_PROP_FRAME_WIDTH, value)
+            self.capture.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, value)
         else:
             self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, value)
 
@@ -51,7 +48,7 @@ class Camera(object):
     @height.setter
     def height(self, value):
         if self.cv_version_major == '2':
-            cv2.cv.SetCaptureProperty(self.capture, cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, value)
+            self.capture.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, value)
         else:
             self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, value)
 
@@ -64,7 +61,7 @@ class Camera(object):
     @fps.setter
     def fps(self, value):
         if self.cv_version_major == '2':
-            cv2.cv.SetCaptureProperty(self.capture, cv2.cv.CV_CAP_PROP_FPS, value)
+            self.capture.set(cv2.cv.CV_CAP_PROP_FPS, value)
         else:
             self.capture.set(cv2.CAP_PROP_FPS, value)
 
@@ -78,7 +75,7 @@ class Camera(object):
     def mode(self, value):
         self._mode = value
         if self.cv_version_major == '2':
-            self.font  = cv2.cv.InitFont(cv2.cv.CV_FONT_HERSHEY_SIMPLEX, 0.5*(self.mode+1), 0.5*(self.mode+1), 0, self.mode+1, 8)
+            self.font  = cv2.cv.CV_FONT_HERSHEY_SIMPLEX
         else:
             self.font  = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -99,51 +96,31 @@ class Camera(object):
         self._textColor = value
 
     def get_image(self, put_date=False, frameSpeed=0, frameFps=0):
-        red, green, blue = self.textColor
+        textColor = self.textColor
+        ret, img = self.capture.read()
+
+        if not ret:
+            logger.error('Ошибка захвата кадра')
+            return ''
+
+        #Задержка для нормализации периодического процесса захвата (см. документацию)
+        #По непонятной причине из-за cv2.cv.WaitKey вылетает сервер
+        #с ошибкой "Ошибка сегментирования (сделан дамп памяти)" после смены размера картинки
+        #cv2.cv.WaitKey(10)
+
+        if put_date:
+            text = time.strftime('%d/%m/%Y %H:%M:%S',time.localtime())
+            textSize, baseline = cv2.getTextSize(text, self.font, 0.5*(self.mode+1), self.mode+1)
+            cv2.putText(img, text, (textSize[1],2*textSize[1]), self.font, 0.5*(self.mode+1), textColor, self.mode+1)
+
+        if frameSpeed:
+            text = str(frameSpeed) + 'kb/s  ' + str(frameFps) + 'fps'
+            textSize, baseline = cv2.getTextSize(text, self.font, 0.5*(self.mode+1), self.mode+1)
+            cv2.putText(img, text, (self.width - textSize[0] - textSize[1], self.height - textSize[1]), self.font, 0.5*(self.mode+1), textColor, self.mode+1)
 
         if self.cv_version_major == '2':
-            textColor = cv2.cv.RGB(red, green, blue)
-            img = cv2.cv.QueryFrame(self.capture)
-
-            #Задержка для нормализации периодического процесса захвата (см. документацию)
-            #По непонятной причине из-за cv2.cv.WaitKey вылетает сервер
-            #с ошибкой "Ошибка сегментирования (сделан дамп памяти)" после смены размера картинки
-            #cv2.cv.WaitKey(10)
-
-            if put_date:
-                text = time.strftime('%d/%m/%Y %H:%M:%S',time.localtime())
-                textSize, baseline = cv2.cv.GetTextSize(text, self.font)
-                cv2.cv.PutText(img, text, (textSize[1],2*textSize[1]), self.font, textColor)
-
-            if frameSpeed:
-                text = str(frameSpeed) + 'kb/s  ' + str(frameFps) + 'fps'
-                textSize, baseline = cv2.cv.GetTextSize(text, self.font)
-                cv2.cv.PutText(img, text, (self.width - textSize[0] - textSize[1], self.height - textSize[1]), self.font, textColor)
-
-            cv2mat = cv2.cv.EncodeImage('.jpeg', img, (cv2.cv.CV_IMWRITE_JPEG_QUALITY, self.quality))
+            ret, cv2mat = cv2.imencode('.jpeg', img, (cv2.cv.CV_IMWRITE_JPEG_QUALITY, self.quality))
         else:
-            textColor = self.textColor
-            ret, img = self.capture.read()
-
-            if not ret:
-                logger.error('Ошибка захвата кадра')
-                return ''
-
-            #Задержка для нормализации периодического процесса захвата (см. документацию)
-            #По непонятной причине из-за cv2.WaitKey вылетает сервер
-            #с ошибкой "Ошибка сегментирования (сделан дамп памяти)" после смены размера картинки
-            #cv2.WaitKey(10)
-
-            if put_date:
-                text = time.strftime('%d/%m/%Y %H:%M:%S',time.localtime())
-                textSize, baseline = cv2.getTextSize(text, self.font, 0.5*(self.mode+1), self.mode+1)
-                cv2.putText(img, text, (textSize[1],2*textSize[1]), self.font, 0.5*(self.mode+1), textColor, self.mode+1)
-
-            if frameSpeed:
-                text = str(frameSpeed) + 'kb/s  ' + str(frameFps) + 'fps'
-                textSize, baseline = cv2.getTextSize(text, self.font, 0.5*(self.mode+1), self.mode+1)
-                cv2.putText(img, text, (self.width - textSize[0] - textSize[1], self.height - textSize[1]), self.font, 0.5*(self.mode+1), textColor, self.mode+1)
-
             ret, cv2mat = cv2.imencode('.jpeg', img, (cv2.IMWRITE_JPEG_QUALITY, self.quality))
 
         return cv2mat.tostring()
@@ -160,7 +137,3 @@ class Camera(object):
 
     def get_resolutions(self):
         return self.resolutions
-
-
-if __name__ == '__main__':
-    pass
