@@ -16,6 +16,9 @@ class Camera(object):
 
         self.capture = cv2.VideoCapture(cam_num)
 
+        if not self.capture.isOpened():
+            raise RuntimeError('Could not start camera.')
+
         self.resolutions = {0: (352,288), 1: (640,480), 2: (1280,720), 3: (1280,1024)}
         self.num     = cam_num
         self.mode    = cam_mode
