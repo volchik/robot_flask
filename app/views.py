@@ -311,14 +311,21 @@ def set_resolution(mode):
     return '%sx%s' % (current_app.camera.width, current_app.camera.height)
 
 
-@app.route('/.well-known/acme-challenge/<string:file>')
+@app.route('/.well-known/pki-validation/<string:file>')
 def get_file(file):
-    f = open('app/data/' + file, 'r')
+    f = open(os.path.join(os.path.dirname(__file__), 'data', file), 'r')
     data = f.read()
     f.close()
     logger.info('Загрузка файла "%s"' % (file))
     return data
 
+@app.route('/<string:file>')
+def get_file_root(file):
+    f = open(os.path.join(os.path.dirname(__file__), 'data', file), 'r')
+    data = f.read()
+    f.close()
+    logger.info('Загрузка файла "%s"' % (file))
+    return data
 
 @app.errorhandler(401)
 def page_access_denied(error):
